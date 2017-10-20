@@ -1,4 +1,4 @@
-package kube2iam
+package k8s
 
 import (
 	"encoding/json"

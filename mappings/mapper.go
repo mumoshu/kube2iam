@@ -6,8 +6,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/pkg/api/v1"
 
-	"github.com/jtblin/kube2iam"
 	"github.com/jtblin/kube2iam/iam"
+	"github.com/jtblin/kube2iam/k8s"
 )
 
 // RoleMapper handles relevant logic around associating IPs with a given IAM role
@@ -86,7 +86,7 @@ func (r *RoleMapper) checkRoleForNamespace(roleArn string, namespace string) boo
 		return false
 	}
 
-	ar := kube2iam.GetNamespaceRoleAnnotation(ns, r.namespaceKey)
+	ar := k8s.GetNamespaceRoleAnnotation(ns, r.namespaceKey)
 	for _, role := range ar {
 		if r.iam.RoleARN(role) == roleArn {
 			log.Debugf("Role: %s on namespace:%s found.", roleArn, namespace)
@@ -118,7 +118,7 @@ func (r *RoleMapper) DumpDebugInfo() map[string]interface{} {
 
 	for _, namespaceName := range r.store.ListNamespaces() {
 		if namespace, err := r.store.NamespaceByName(namespaceName); err == nil {
-			rolesByNamespace[namespace.GetName()] = kube2iam.GetNamespaceRoleAnnotation(namespace, r.namespaceKey)
+			rolesByNamespace[namespace.GetName()] = k8s.GetNamespaceRoleAnnotation(namespace, r.namespaceKey)
 		}
 	}
 

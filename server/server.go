@@ -17,7 +17,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/jtblin/kube2iam"
 	"github.com/jtblin/kube2iam/iam"
 	"github.com/jtblin/kube2iam/k8s"
 	"github.com/jtblin/kube2iam/mappings"
@@ -259,7 +258,7 @@ func write(logger *log.Entry, w http.ResponseWriter, s string) {
 }
 
 // Run runs the specified Server.
-func (s *Server) Run(host, token string, insecure bool) error {
+func (s *Server) Serve(host, token string, insecure bool) error {
 	k, err := k8s.NewClient(host, token, insecure)
 	if err != nil {
 		return err
@@ -267,8 +266,8 @@ func (s *Server) Run(host, token string, insecure bool) error {
 	s.k8s = k
 	s.iam = iam.NewClient(s.BaseRoleARN)
 	s.roleMapper = mappings.NewRoleMapper(s.IAMRoleKey, s.DefaultIAMRole, s.NamespaceRestriction, s.NamespaceKey, s.iam, s.k8s)
-	podSynched := s.k8s.WatchForPods(kube2iam.NewPodHandler(s.IAMRoleKey))
-	namespaceSynched := s.k8s.WatchForNamespaces(kube2iam.NewNamespaceHandler(s.NamespaceKey))
+	podSynched := s.k8s.WatchForPods(k8s.NewPodHandler(s.IAMRoleKey))
+	namespaceSynched := s.k8s.WatchForNamespaces(k8s.NewNamespaceHandler(s.NamespaceKey))
 
 	synced := false
 	for i := 0; i < defaultCacheSyncAttempts && !synced; i++ {
